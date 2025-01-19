@@ -1,0 +1,7 @@
+<script>
+    async function fetchData() {
+        const response = await fetch('https://github.com/PrathameshAbhyankar/github.io'); // Use your backend's public URL
+        const data = await response.json();
+        document.getElementById('data-container').innerHTML = JSON.stringify(data, null, 2);
+    }
+</script>
