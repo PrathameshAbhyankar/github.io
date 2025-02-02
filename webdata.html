@@ -1,0 +1,76 @@
+
+
+<!--script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script-->
+
+
+
+<!DOCTYPE html>
+   <!--head>
+      <title>{{ title }}</title>
+   </head-->
+  <head>
+  <link rel="stylesheet" href="/static/style.css" />
+  <meta charset="UTF-8">
+  <script type="text/javascript" src="example.js"></script>
+  </head>
+
+  <!--script>
+    function autoRefresh() {
+        window.location = window.location.href;
+    }
+    setInterval('autoRefresh()', 1000);
+  </script-->
+
+   <body>
+      <h1>Hello, World!</h1>
+      <h2>The date and time on the server is: {{ time }}</h2>
+<table>
+  <caption>
+    Front-end web developer course 2021
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Person</th>
+      <th scope="col">Most interest in</th>
+      <th scope="col">Age</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Chris</th>
+      <td>Date and time on server:</td>
+      <td>{{ time }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Dennis</th>
+      <td>Web accessibility</td>
+      <td>45</td>
+    </tr>
+    <tr>
+      <th scope="row">Sarah</th>
+      <td>JavaScript frameworks</td>
+      <td>29</td>
+    </tr>
+    <tr>
+      <th scope="row">Karen</th>
+      <td>Web performance</td>
+      <td>36</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th scope="row" colspan="2">Average age</th>
+      <td>33</td>
+    </tr>
+  </tfoot>
+</table>
+
+      
+  <div id="demo">
+    <!--h1>Use jQuery load() to change this text</h1>
+    <button id="button" type="button">Change Content</button-->
+   <h1>Use a XMLHttpRequest to change this text</h1>
+    <button type="button" onclick="loadContent('https://baconipsum.com/api/?type=meat-and-filler')">Change Content</button>    
+  </div>
+   </body>
+</html>
