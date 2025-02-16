@@ -12,9 +12,18 @@ import datetime
 
 Fire_Reported = 0
 
+arrayAnimal = ["" for x in range(12)]
+
+arrayNode = ["" for x in range(12)]
+
+arrayTime = ["" for x in range(12)]
+
+
 #global ObjectName
 
 ObjectName = "Start"
+
+dataString  = "Protocol"
 
 #thres = 0.45 # Threshold to detect object
 
@@ -39,15 +48,56 @@ app = Flask(__name__)
 def function1():
 
    print("Function 1 running")
-   global Fire_Reported   
+   global Fire_Reported
    #function2()
    now = datetime.datetime.now()
    #timeString = now.strftime("%Y-%m-%d %H:%M:%S")
    timeString = "Fire no. :" + str(Fire_Reported)
+   #hold = ObjectName.split('#')
+   #ObjectNameLocal = hold[0]
+   #node = hold[1]
+   #timeString = hold[2]
+   
+   #print("Full string")
+   print(ObjectName)
+
+
+
    templateData = {
       'title' : 'HELLO!',
-      'time': timeString ,
-      'entity': ObjectName
+      'time': arrayTime[0] ,
+      'entity': arrayAnimal[0],
+      'node':arrayNode[0],
+      'time1': arrayTime[1] ,
+      'entity1': arrayAnimal[1],
+      'node1':arrayNode[1],      
+      'time2': arrayTime[2] ,
+      'entity2': arrayAnimal[2],
+      'node2':arrayNode[2],      
+      'time3': arrayTime[3] ,
+      'entity3': arrayAnimal[3],
+      'node3':arrayNode[3],      
+      'time4': arrayTime[4] ,
+      'entity4': arrayAnimal[4],
+      'node4':arrayNode[4] ,     
+      'time5': arrayTime[5] ,
+      'entity5': arrayAnimal[5],
+      'node5':arrayNode[5]  ,    
+      'time6': arrayTime[6] ,
+      'entity6': arrayAnimal[6],
+      'node6':arrayNode[6]   ,   
+      'time7': arrayTime[7] ,
+      'entity7': arrayAnimal[7],
+      'node7':arrayNode[7]    ,  
+      'time8': arrayTime[8] ,
+      'entity8': arrayAnimal[8],
+      'node8':arrayNode[8]     , 
+      'time9': arrayTime[8] ,
+      'entity9': arrayAnimal[9],
+      'node9':arrayNode[9]      ,
+      'time10': arrayTime[10] ,
+      'entity10': arrayAnimal[10],
+      'node10':arrayNode[10]       
       }
    return render_template('webdata.html', **templateData)  
    #return 0
@@ -56,7 +106,10 @@ def function1():
 def getObjects(img, thres, nms, draw=True, objects=[]):
     classIds, confs, bbox = net.detect(img,confThreshold=thres,nmsThreshold=nms)
     #print(classIds,bbox)
-    global ObjectName
+    j = 0
+    global ObjectName 
+    global array 
+    
     if len(objects) == 0: objects = classNames
     objectInfo =[]
     if len(classIds) != 0:
@@ -72,8 +125,17 @@ def getObjects(img, thres, nms, draw=True, objects=[]):
                     cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0),2)
                     print("Object Names : ")
                     ObjectName = str(classNames[classId-1].upper())
-                    print(classNames[classId-1].upper())
-                    print("The variable, name is of type:", type(classNames[classId-1].upper()))                    
+                    now = datetime.datetime.now()
+                    dataString = ObjectName + "#Node 1 (Master Node)" + "#" + now.strftime("%Y-%m-%d %H:%M:%S")
+                    #print(dataString)
+                    arrayAnimal[j] = ObjectName
+                    arrayNode[j] = "Node 1 (Master Node)"
+                    arrayTime[j] = now.strftime("%Y-%m-%d %H:%M:%S")
+                    j += 1;
+                    if j > 10 : 
+                       j=10;
+                    print(ObjectName)
+                    #print("The variable, name is of type:", type(classNames[classId-1].upper()))                    
 
 
     return img,objectInfo
@@ -85,7 +147,8 @@ def index2(page_name):
     print(f"{page_name}")
     #print()  
     #Fire_Reported = 0
-    global Fire_Reported    
+    global Fire_Reported 
+    #global dataString   
     cap = cv2.VideoCapture(0)
     cap.set(3,640)
     cap.set(4,480)
@@ -131,7 +194,7 @@ def index2(page_name):
 if __name__ == "__main__":
 
 
-    app.run(host='192.168.145.123', port=5000, debug=True)       
+    app.run(host='192.168.236.123', port=5000, debug=True)       
 
 
     
