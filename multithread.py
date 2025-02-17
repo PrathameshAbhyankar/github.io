@@ -3,10 +3,14 @@ import numpy as np
 import smtplib
 #import playsound
 import threading
+import socket             
 
 from flask import Flask, render_template
 #import flask
 import datetime
+
+import geocoder
+from geopy.geocoders import Nominatim
 
 #global Fire_Reported
 
@@ -17,6 +21,8 @@ arrayAnimal = ["" for x in range(12)]
 arrayNode = ["" for x in range(12)]
 
 arrayTime = ["" for x in range(12)]
+
+arrayLocation = ["" for x in range(12)]
 
 
 #global ObjectName
@@ -68,36 +74,47 @@ def function1():
       'time': arrayTime[0] ,
       'entity': arrayAnimal[0],
       'node':arrayNode[0],
+      'location':arrayLocation[0],      
       'time1': arrayTime[1] ,
       'entity1': arrayAnimal[1],
-      'node1':arrayNode[1],      
+      'node1':arrayNode[1], 
+      'location1':arrayLocation[1],                 
       'time2': arrayTime[2] ,
       'entity2': arrayAnimal[2],
-      'node2':arrayNode[2],      
+      'node2':arrayNode[2],     
+      'location2':arrayLocation[2],             
       'time3': arrayTime[3] ,
       'entity3': arrayAnimal[3],
-      'node3':arrayNode[3],      
+      'node3':arrayNode[3],     
+      'location3':arrayLocation[3],             
       'time4': arrayTime[4] ,
       'entity4': arrayAnimal[4],
-      'node4':arrayNode[4] ,     
+      'node4':arrayNode[4] ,    
+      'location4':arrayLocation[4],             
       'time5': arrayTime[5] ,
       'entity5': arrayAnimal[5],
-      'node5':arrayNode[5]  ,    
+      'node5':arrayNode[5]  ,   
+      'location5':arrayLocation[5],             
       'time6': arrayTime[6] ,
       'entity6': arrayAnimal[6],
-      'node6':arrayNode[6]   ,   
+      'node6':arrayNode[6]   ,  
+      'location6':arrayLocation[6],             
       'time7': arrayTime[7] ,
       'entity7': arrayAnimal[7],
-      'node7':arrayNode[7]    ,  
+      'node7':arrayNode[7]    , 
+      'location7':arrayLocation[7],             
       'time8': arrayTime[8] ,
       'entity8': arrayAnimal[8],
-      'node8':arrayNode[8]     , 
-      'time9': arrayTime[8] ,
+      'node8':arrayNode[8] ,
+      'location8':arrayLocation[8],             
+      'time9': arrayTime[9] ,
       'entity9': arrayAnimal[9],
-      'node9':arrayNode[9]      ,
+      'node9':arrayNode[9] ,
+      'location9':arrayLocation[9],            
       'time10': arrayTime[10] ,
       'entity10': arrayAnimal[10],
-      'node10':arrayNode[10]       
+      'node10':arrayNode[10],
+      'location10':arrayLocation[10],                   
       }
    return render_template('webdata.html', **templateData)  
    #return 0
@@ -125,6 +142,18 @@ def getObjects(img, thres, nms, draw=True, objects=[]):
                     cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0),2)
                     print("Object Names : ")
                     ObjectName = str(classNames[classId-1].upper())
+                    
+                    
+                    g = geocoder.ip('me')
+                    print(g.latlng)
+                    #geoLoc = Nominatim(user_agent="GetLoc")
+                    lattlongStringArray = g.latlng
+                    lattLongString = str(lattlongStringArray[0]) + "," + str(lattlongStringArray[1]) 
+                    #locname = geoLoc.reverse(lattLongString)
+                    #arrayLocation[j] = locname.address
+                    arrayLocation[j] = lattLongString
+                    #print(locname.address)
+                    
                     now = datetime.datetime.now()
                     dataString = ObjectName + "#Node 1 (Master Node)" + "#" + now.strftime("%Y-%m-%d %H:%M:%S")
                     #print(dataString)
@@ -153,11 +182,10 @@ def index2(page_name):
     cap.set(3,640)
     cap.set(4,480)
     #cap.set(10,70)
-    
-
-
 
     while True:
+    
+
         success, img = cap.read()
         result, objectInfo = getObjects(img,0.45,0.2)
         #print(objectInfo)
@@ -188,13 +216,18 @@ def index2(page_name):
         
 
         cv2.waitKey(1)
+        #c.close()
+
+	# Breaking once connection closed
+        break
+
 
 
 
 if __name__ == "__main__":
 
 
-    app.run(host='192.168.236.123', port=5000, debug=True)       
+    app.run(host='192.168.232.123', port=5000, debug=True)       
 
 
     
