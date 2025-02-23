@@ -98,8 +98,8 @@ def getObjects(img, thres, nms, draw=True, objects=[]):
                     #arrayLocation[j] = locname.address
                     arrayLocation[j] = lattLongString                    
                     j += 1;
-                    if j > 10 : 
-                       j=10;
+                    if j > 9 : 
+                       j=9;
                     print(ObjectName)
                     #print("The variable, name is of type:", type(classNames[classId-1].upper()))                    
 
@@ -177,10 +177,10 @@ def cloudData(argsCloud,arg1):
         name = "Bobby" + str(it)
         it = it + 1    
         data = json.dumps({
-	    'time_observed': arrayTime[0],
-	    'location': arrayLocation[0],
-	    'count': arrayNode[0],
-	    'species': arrayAnimal[0],
+	    'time_observed': arrayTime[10],
+	    'location': arrayLocation[10],
+	    'count': arrayNode[10],
+	    'species': arrayAnimal[10],
 	    'temperature': str(Fire_Reported),
 	    'humidity':str(Fire_Reported),
 	    'observer_id':name	    
@@ -206,8 +206,19 @@ def listener(client, address):
         clients.add(client)
     try:    
         while True:
-            ObjectName  = client.recv(1024)
-            data = ObjectName
+            data  = client.recv(1024)
+            conv = data.decode()
+            hold = conv.split('#')
+            arrayAnimal[10] = hold[0]
+            arrayNode[10] = hold[1]
+            arrayLocation[10] = hold[2]
+            arrayTime[10] = hold[3]  
+            print(data)
+            print(hold[0])
+            print(hold[1])                      
+            print(hold[2])
+            print(hold[3])
+                           
             if not data:
                 break
             else:
@@ -231,20 +242,25 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind((host,port))
 s.listen(10)
 th = []
-i = 1;
+
+timeNo = 1
+
 while True:
     print ("Server is listening for connections...")
     client, address = s.accept()
     timestamp = datetime.datetime.now().strftime("%I:%M:%S %p")
     
     
-    timestamp += str(i)
+    timestamp += str(timeNo)
     client.sendall(timestamp.encode()) 
-    i = i +1
-    time.sleep(1)
+    timeNo += 1
+
+
     th.append(Thread(target=listener, args = (client,address)).start())
     
     th.append(Thread(target=frameCapture, args = (ObjectName)).start())    
-    th.append(Thread(target=cloudData, args = (argsCloud)).start())        
+    th.append(Thread(target=cloudData, args = (argsCloud)).start())   
+    
+    time.sleep(1)         
     
 #s.close()
