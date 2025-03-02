@@ -214,10 +214,7 @@ def listener(client, address):
             arrayLocation[10] = hold[2]
             arrayTime[10] = hold[3]  
             print(data)
-            print(hold[0])
-            print(hold[1])                      
-            print(hold[2])
-            print(hold[3])
+
                            
             if not data:
                 break
@@ -240,6 +237,7 @@ port = 10016
 s = socket.socket()
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind((host,port))
+#s.bind(('',port))
 s.listen(10)
 th = []
 
