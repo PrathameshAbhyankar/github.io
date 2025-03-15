@@ -188,7 +188,7 @@ def listener(client, address):
     host = socket.gethostname()        
     port = 10016
     #s.connect((host, port))
-    s.connect(('192.168.167.123',port))
+    s.connect(('192.168.39.123',port))
     #s.bind((host,port))
 
     #g = geocoder.ip('me')
@@ -210,8 +210,129 @@ def listener(client, address):
             s.close()
 
 
+def MPU_Init():
+	#write to sample rate register
+	bus.write_byte_data(Device_Address, SMPLRT_DIV, 7)
+	
+	#Write to power management register
+	bus.write_byte_data(Device_Address, PWR_MGMT_1, 1)
+	
+	#Write to Configuration register
+	bus.write_byte_data(Device_Address, CONFIG, 0)
+	
+	#Write to Gyro configuration register
+	bus.write_byte_data(Device_Address, GYRO_CONFIG, 24)
+	
+	#Write to interrupt enable register
+	bus.write_byte_data(Device_Address, INT_ENABLE, 1)
+
+def read_raw_data(addr):
+	#Accelero and Gyro value are 16-bit
+        high = bus.read_byte_data(Device_Address, addr)
+        low = bus.read_byte_data(Device_Address, addr+1)
+    
+        #concatenate higher and lower value
+        value = ((high << 8) | low)
+        
+        #to get signed value from mpu6050
+        if(value > 32768):
+                value = value - 65536
+        return value
+
+
+def gyro_acc_thread(gyro,acc):
+
+    PWR_MGMT_1   = 0x6B
+    SMPLRT_DIV   = 0x19
+    CONFIG       = 0x1A
+    GYRO_CONFIG  = 0x1B
+    INT_ENABLE   = 0x38
+    ACCEL_XOUT_H = 0x3B
+    ACCEL_YOUT_H = 0x3D
+    ACCEL_ZOUT_H = 0x3F
+    GYRO_XOUT_H  = 0x43
+    GYRO_YOUT_H  = 0x45
+    GYRO_ZOUT_H  = 0x47
+
+    bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
+    Device_Address = 0x68   # MPU6050 device address
+
+    MPU_Init()
+
+    print (" Reading Data of Gyroscope and Accelerometer")
+
+    i = 0
+
+    avg = 0
+
+    begin = 0
+
+    arrayAX = [i * 0.01 for i in range(100)]
+    arrayAXString = ["" for x in range(100)]
+
+
+    while True:
+
+	#Read Accelerometer raw value
+        acc_x = read_raw_data(ACCEL_XOUT_H)
+        acc_y = read_raw_data(ACCEL_YOUT_H)
+        acc_z = read_raw_data(ACCEL_ZOUT_H)
+
+	#Read Gyroscope raw value
+        gyro_x = read_raw_data(GYRO_XOUT_H)
+        gyro_y = read_raw_data(GYRO_YOUT_H)
+        gyro_z = read_raw_data(GYRO_ZOUT_H)
+
+	#Full scale range +/- 250 degree/C as per sensitivity scale factor
+        Ax = acc_x/16384.0
+        Ay = acc_y/16384.0
+        Az = acc_z/16384.0
+
+    #Ax0 = Ax
+
+        Gx = gyro_x/131.0
+        Gy = gyro_y/131.0
+        Gz = gyro_z/131.0
+
+        temp = Ax
+        arrayAX[i] = Ax
+
+     #i += 1
+
+        if(i > 98):
+             i = 0
+
+        arrayAXString[0] = "0"
+        arrayAXString[i+1] = str(Ax)
+
+        delta = abs(float(arrayAXString[i+1]) - float(arrayAXString[i]))
+
+        print("delta %f " %delta)
+
+        if(delta < 0.2):
+             avg = 0.5 * ( float(arrayAXString[i+1]) + float(arrayAXString[i]))
+             begin = time.time()
+        delta2 = abs(float(arrayAXString[i+1]) - abs(avg))
+        distance = 0
+        if(abs(float(arrayAXString[i+1]) > abs(avg))):
+             end = time.time()
+             timeCal = end - begin
+             distance = 0.5 *  delta2 * ( timeCal ** 2 )
+             print("avg = %f" %avg , "delta2 %f" %delta2 , "timeCal %f" %timeCal , "distance %f" %distance)
+
+
+     #if(abs(arrayAX[i+1] - arrayAX[i]) < 0.3):
+     #     avg = 0.5 * (arrayAX[i+1] + arrayAX[i])
+
+     #print("i=%d" %i , "temp %.2f " %temp , "arrayAX=%.3f" %arrayAX[i] , "avg AX = %.3f" %avg)
+             print ("Gx=%.2f" %Gx, u'\u00b0'+ "/s", "\tGy=%.2f" %Gy, u'\u00b0'+ "/s", "\tGz=%.2f" %Gz, u'\u00b0'+ "/s", "\tAx=%.2f g" %Ax, "\tAy=%.2f g" %Ay, "\tAz=%.2f g" %Az)
+             i += 1
+             sleep(1)
+
+
 frameArgs = "FD"
 listenerArgs = "LD"  
+argsGyro = "GD"
 
 if __name__ =="__main__":
 
@@ -219,14 +340,14 @@ if __name__ =="__main__":
 
 	t1 = threading.Thread(target=listener, args=(listenerArgs))
 	t2 = threading.Thread(target=frameCapture, args=(frameArgs))
-	#t3 = threading.Thread(target=cloudData, args=(argsCloud))    
+	t3 = threading.Thread(target=gyro_acc_thread, args=(argsGyro))    
 
 	t1.start()
 	t2.start()
-	#t3.start()
+	t3.start()
 
 	t1.join()
 	t2.join()
-	#t3.join()
+	t3.join()
 
 	print("Done!")
